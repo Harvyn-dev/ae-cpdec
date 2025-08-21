@@ -8,7 +8,10 @@ export const revalidate = 0;
 export default function LoginPage() {
   return (
     <div className="min-h-screen grid md:grid-cols-2">
+      {/* Bande visuelle gauche */}
       <div className="hidden md:block bg-[#0A2E73]" />
+
+      {/* Colonne formulaire */}
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <Suspense

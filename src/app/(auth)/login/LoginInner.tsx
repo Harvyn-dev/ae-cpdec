@@ -1,11 +1,12 @@
 "use client";
+
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 
 export default function LoginInner() {
-  const r = useRouter();
+  const router = useRouter();
   const q = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -13,42 +14,64 @@ export default function LoginInner() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
     const fd = new FormData(e.currentTarget);
+    const email = String(fd.get("email") || "");
+    const password = String(fd.get("password") || "");
+    const callbackUrl = q.get("next") || "/";
+
     setLoading(true);
     const res = await signIn("credentials", {
       redirect: false,
-      email: fd.get("email"),
-      password: fd.get("password"),
+      email,
+      password,
+      callbackUrl, // on passe le next pour rediriger correctement
     });
     setLoading(false);
-    if (res?.ok) r.push("/");
+
+    if (res?.ok) router.push(callbackUrl);
     else setError(res?.error || "Email ou mot de passe incorrect");
   }
 
   return (
     <div className="bg-white border rounded-2xl p-6 shadow-sm">
       <h1 className="text-2xl font-bold mb-1 text-[#0A2E73]">Se connecter</h1>
+
       {q.get("registered") && (
         <p className="text-sm text-green-700 mb-2">
           Compte créé. Vous pouvez vous connecter.
         </p>
       )}
 
-      <form className="grid gap-3" onSubmit={onSubmit}>
+      <form className="grid gap-3" onSubmit={onSubmit} autoComplete="on">
         <label className="text-sm">
           Email
-          <input name="email" type="email" className="input" required />
+          <input
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            className="input"
+            required
+          />
         </label>
+
         <label className="text-sm">
           Mot de passe
-          <input name="password" type="password" className="input" required />
+          <input
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            className="input"
+            required
+          />
         </label>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <button
           disabled={loading}
-          className="bg-[#0A2E73] hover:brightness-110 text-white rounded-md py-2 transition"
+          className="bg-[#0A2E73] hover:brightness-110 text-white rounded-md py-2 transition disabled:opacity-60"
         >
           {loading ? "Connexion..." : "Se connecter"}
         </button>
@@ -70,6 +93,8 @@ export default function LoginInner() {
           border-radius: 0.6rem;
           padding: 0.6rem;
           margin-top: 0.25rem;
+          background: #fff; /* évite le “texte blanc sur blanc” */
+          color: #111827;
         }
         .input:focus {
           outline: 2px solid #0a2e73;
