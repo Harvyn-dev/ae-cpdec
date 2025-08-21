@@ -140,8 +140,8 @@ export default async function HomePage() {
     },
     {
       role: "VP",
-      firstName: "X",
-      lastName: "Y",
+      firstName: "Chloé",
+      lastName: "OUATTARA",
       className: "DCG 3",
       photo: "/officers/vp.jpg",
     },
@@ -149,7 +149,7 @@ export default async function HomePage() {
       role: "SG",
       firstName: "Nathan",
       lastName: "BROU",
-      className: "DCG 3",
+      className: "DSCG 1",
       photo: "/officers/sg.jpg",
     },
   ]}
