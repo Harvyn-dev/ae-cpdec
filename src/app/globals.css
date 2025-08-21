@@ -24,3 +24,45 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Exemple rapide */
+:root { --blue:#0A2E73; --yellow:#E9C823; }
+
+/* Toujours du texte foncé sur inputs, même en dark mode */
+input, textarea, select {
+  background-color: #fff !important;
+  color: #0A2E73 !important; /* bleu AE-CPDEC lisible */
+}
+
+/* Placeholder lisible */
+input::placeholder,
+textarea::placeholder {
+  color: rgba(10, 46, 115, 0.6) !important;
+}
+
+/* Corrige l’autofill (Safari/Chrome) qui force du blanc */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #0A2E73 !important;
+  box-shadow: 0 0 0px 1000px #fff inset !important; /* garde fond blanc */
+  transition: background-color 9999s ease-in-out 0s !important;
+}
+
+/* Optionnel : cette ligne indique aux navigateurs d'utiliser des contrôles clairs */
+/* Force le rendu clair pour tout le site, même si l’OS est en dark */
+:root, html, body {
+  color-scheme: light;
+}
+
+/* (Optionnel) Petits correctifs pour les champs automatiquement remplis */
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #0A2E73 !important;
+  box-shadow: 0 0 0px 1000px #fff inset !important;
+}
+
+
