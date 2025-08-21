@@ -31,45 +31,48 @@ export default async function HomePage() {
   return (
     <div className="space-y-12 md:space-y-14">
       {/* HERO — agrandie */}
-      <section className="relative overflow-hidden rounded-3xl text-white min-h-[360px] md:min-h-[460px]">
-      <Image
-        src="/images/hero.jpg"
-        alt="AE-CPDEC — Passation"
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-[70%_40%]" // ← focus vers la droite/haut
-      />
+      <section className="relative overflow-hidden rounded-2xl md:rounded-3xl text-white min-h-[280px] sm:min-h-[360px] md:min-h-[460px]">
+  {/* Image */}
+  <Image
+    src="/images/hero.jpg"
+    alt="AE-CPDEC — Passation"
+    fill
+    priority
+    sizes="100vw"
+    className="object-cover object-[70%_40%]"
+  />
+  <div className="absolute inset-0 bg-[#0A2E73]/60" />
+  <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#0A2E73]/30 via-transparent to-black/25" />
 
-        <div className="absolute inset-0 bg-[#0A2E73]/60" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#0A2E73]/20 via-transparent to-black/25" />
+  <div className="relative px-4 sm:px-6 md:px-10 py-8 sm:py-10 md:py-16 flex h-full items-end md:items-center">
+    <div className="max-w-3xl">
+      <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold drop-shadow">
+        Bienvenue à l’AE-CPDEC
+      </h1>
+      <p className="mt-3 sm:mt-4 max-w-2xl text-white/90 drop-shadow-sm text-base sm:text-lg">
+        Association des Étudiants du Centre de Préparation aux Diplômes de l’Expertise
+        Comptable (INP-HB INTEC).
+      </p>
 
-        <div className="relative px-8 py-10 md:px-14 md:py-16 flex h-full items-start md:items-center">
-          <div>
-            <h1 className="text-4xl md:text-6xl font-extrabold drop-shadow">
-              Bienvenue à l’AE-CPDEC
-            </h1>
-            <p className="mt-4 max-w-2xl text-white/90 drop-shadow-sm text-lg">
-              Association des Étudiants du Centre de Préparation aux Diplômes de l’Expertise
-              Comptable (INP-HB INTEC).
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/news"
-                className="bg-white text-[#0A2E73] px-5 py-2.5 rounded-lg font-semibold"
-              >
-                Voir les actualités
-              </Link>
-              <Link
-                href="/join"
-                className="bg-[#E9C823] text-[#0A2E73] px-5 py-2.5 rounded-lg font-semibold"
-              >
-                Nous rejoindre
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Boutons : en colonne en mobile */}
+      <div className="mt-5 sm:mt-6 flex flex-col xs:flex-row gap-3">
+        <Link
+          href="/news"
+          className="text-center bg-white text-[#0A2E73] px-5 py-2.5 rounded-lg font-semibold"
+        >
+          Voir les actualités
+        </Link>
+        <Link
+          href="/join"
+          className="text-center bg-[#E9C823] text-[#0A2E73] px-5 py-2.5 rounded-lg font-semibold"
+        >
+          Nous rejoindre
+        </Link>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* CARROUSEL D’ACTUALITÉS */}
       <section className="space-y-4">

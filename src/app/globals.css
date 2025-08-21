@@ -65,4 +65,20 @@ select:-webkit-autofill {
   box-shadow: 0 0 0px 1000px #fff inset !important;
 }
 
+/* Container responsive cohérent partout */
+.container {
+  @apply mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* iOS notch safe-area */
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+body {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+
 

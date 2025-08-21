@@ -1,3 +1,4 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import Providers from "@/components/Providers";
 import "./globals.css";
@@ -10,15 +11,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // on force le thème clair et on évite toute surprise à l’hydratation
     <html lang="fr" className="light" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light" />
       </head>
-      <body>
+
+      {/* min-h-screen + flex-col pour coller le footer en bas */}
+      <body className="min-h-screen flex flex-col">
         <Providers>
-          {children}
+          {/* Le contenu prend toute la hauteur restante */}
+          <main className="flex-1">{children}</main>
         </Providers>
+
+        {/* Footer toujours en bas */}
+        <Footer />
       </body>
     </html>
   );
