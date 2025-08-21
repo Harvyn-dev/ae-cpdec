@@ -5,7 +5,7 @@ export default async function PresidentsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-extrabold">Anciens présidents (2010–2025)</h1>
+      <h1 className="text-3xl font-extrabold">Anciens présidents (2019–2025)</h1>
       <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {list.map(p => (
           <li key={p.id} className="rounded-2xl bg-white p-5 border">

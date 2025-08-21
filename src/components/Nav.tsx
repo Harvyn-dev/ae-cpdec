@@ -20,7 +20,6 @@ export default function Nav() {
           <Link href="/join" className={link}>Nous rejoindre</Link>
           <Link href="/contact" className={link}>Nous contacter</Link>
           <Link href="/statuts" className={link}>Statuts</Link>
-          <Link href="/presidents" className={link}>Présidents</Link>
         </nav>
 
         <div className="flex items-center gap-4">
