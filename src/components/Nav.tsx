@@ -10,7 +10,7 @@ export default function Nav() {
     <header className="w-full bg-[#0A2E73] shadow-md sticky top-0 z-50">
       <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-4">
-          <Image src="/ae-cpdec-logo.jpg" alt="AE-CPDEC" width={72} height={72} className="rounded-full bg-white p-1" priority />
+          <Image src="/images/logo.png" alt="AE-CPDEC" width={72} height={72} className="rounded-full bg-white p-1" priority />
           <span className="font-bold tracking-wide text-2xl !text-white">AE-CPDEC</span>
         </Link>
 
