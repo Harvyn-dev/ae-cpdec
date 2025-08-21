@@ -33,7 +33,7 @@ export default async function HomePage() {
       {/* HERO — agrandie */}
       <section className="relative overflow-hidden rounded-3xl text-white min-h-[360px] md:min-h-[460px]">
       <Image
-        src="/IMG_5927.JPG"
+        src="/images/hero.jpg"
         alt="AE-CPDEC — Passation"
         fill
         priority
@@ -136,7 +136,7 @@ export default async function HomePage() {
       firstName: "Chris-Ivan",
       lastName: "ABBA",
       className: "DCG 3",
-      photo: "/officers/IMG_5928 2.jpg",
+      photo: "/officers/pr.jpg",
     },
     {
       role: "VP",
@@ -150,7 +150,7 @@ export default async function HomePage() {
       firstName: "Nathan",
       lastName: "BROU",
       className: "DCG 3",
-      photo: "/officers/IMG_5926.jpg",
+      photo: "/officers/sg.jpg",
     },
   ]}
 />
