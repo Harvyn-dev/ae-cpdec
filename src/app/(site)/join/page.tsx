@@ -17,12 +17,20 @@ export default function JoinPage() {
             <p className="mt-2">Adhésion annuelle : <b>10 000 FCFA</b></p>
             <div className="mt-4 grid sm:grid-cols-2 gap-4">
               <div className="rounded-xl border p-4">
-                <p className="font-semibold">MTN MoMo</p>
-                <p className="text-[#0A2E73]/80">05 05 05 05</p>
+                <p className="font-semibold">MTN MoMo et WAVE</p>
+                <p className="text-[#0A2E73]/80">05 00 52 26 26</p>
               </div>
               <div className="rounded-xl border p-4">
-                <p className="font-semibold">Orange Money</p>
-                <p className="text-[#0A2E73]/80">07 07 07 07</p>
+                <p className="font-semibold">WAVE</p>
+                <p className="text-[#0A2E73]/80">01 50 67 27 09</p>
+              </div>
+              <div className="rounded-xl border p-4">
+                <p className="font-semibold">MOOV MONEY</p>
+                <p className="text-[#0A2E73]/80">01 73 99 00 41</p>
+              </div>
+              <div className="rounded-xl border p-4">
+                <p className="font-semibold">ORANGE MONEY</p>
+                <p className="text-[#0A2E73]/80">07 12 13 41 28</p>
               </div>
             </div>
             <div className="mt-4 rounded-xl bg-[#0A2E73]/5 border p-4">
