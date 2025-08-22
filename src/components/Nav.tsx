@@ -27,7 +27,6 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 
-  // nom d'affichage le plus robuste possible selon tes champs
   const displayName = useMemo(() => {
     const u = session?.user as any;
     return u?.name || [u?.firstName, u?.lastName].filter(Boolean).join(" ") || null;
@@ -45,24 +44,30 @@ export default function Navbar() {
             alt="AE-CPDEC"
             className="h-9 w-9 rounded-full bg-white object-contain"
           />
-          <span className="font-extrabold text-lg leading-none">
+          <span className="font-extrabold text-xl md:text-2xl leading-none">
             AE-<span className="opacity-90">CPDEC</span>
           </span>
         </Link>
 
         {/* Liens desktop */}
         <nav className="hidden md:flex items-center gap-6">
-          {NAV.map((it) => (
-            <Link
-              key={it.href}
-              href={it.href}
-              className={`text-sm font-medium hover:text-[#E9C823] transition ${
-                pathname === it.href ? "text-[#E9C823]" : "text-white/90"
-              }`}
-            >
-              {it.label}
-            </Link>
-          ))}
+          {NAV.map((it) => {
+            const active = pathname === it.href;
+            return (
+              <Link
+                key={it.href}
+                href={it.href}
+                className={[
+                  // tailles : base = 15px, md = 16px, lg = 18px
+                  "text-[15px] md:text-base lg:text-lg",
+                  "font-medium transition rounded-md px-1 py-2 outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                  active ? "text-[#E9C823]" : "text-white/90 hover:text-[#E9C823]"
+                ].join(" ")}
+              >
+                {it.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Zone droite */}
@@ -70,7 +75,7 @@ export default function Navbar() {
           {!session?.user && (
             <Link
               href="/login"
-              className="hidden md:inline-flex bg-[#E9C823] text-[#0A2E73] px-3 py-1.5 rounded-md text-sm font-semibold hover:brightness-105"
+              className="hidden md:inline-flex bg-[#E9C823] text-[#0A2E73] px-3 py-2 rounded-md text-[15px] md:text-base font-semibold hover:brightness-105 outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             >
               Se connecter
             </Link>
@@ -81,13 +86,14 @@ export default function Navbar() {
               <button
                 onClick={() => setUserOpen((v) => !v)}
                 onBlur={() => setTimeout(() => setUserOpen(false), 150)}
-                className="h-9 w-9 rounded-full bg-white text-[#0A2E73] font-bold grid place-items-center border"
+                className="h-10 w-10 rounded-full bg-white text-[#0A2E73] font-bold grid place-items-center border outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 aria-label="Menu utilisateur"
+                aria-expanded={userOpen}
               >
                 {ini}
               </button>
               {userOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-md border bg-white text-[#0A2E73] shadow-lg overflow-hidden">
+                <div className="absolute right-0 mt-2 w-56 rounded-md border bg-white text-[#0A2E73] shadow-lg overflow-hidden">
                   <div className="px-3 py-2 text-sm font-semibold truncate">{displayName}</div>
                   <button
                     className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
@@ -103,10 +109,10 @@ export default function Navbar() {
           {/* Burger mobile */}
           <button
             onClick={() => setOpen(true)}
-            className="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-white/10"
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 hover:bg-white/10 outline-none focus-visible:ring-2 focus-visible:ring-white/60"
             aria-label="Ouvrir le menu"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3 6h18M3 12h18M3 18h18" stroke="white" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </button>
@@ -123,10 +129,10 @@ export default function Navbar() {
             aria-modal="true"
           >
             <div className="flex items-center justify-between px-4 h-16 border-b">
-              <span className="font-bold">Menu</span>
+              <span className="font-bold text-lg">Menu</span>
               <button
                 aria-label="Fermer"
-                className="p-2 rounded hover:bg-gray-100"
+                className="p-2 rounded hover:bg-gray-100 outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E73]"
                 onClick={() => setOpen(false)}
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -141,9 +147,11 @@ export default function Navbar() {
                   key={it.href}
                   href={it.href}
                   onClick={() => setOpen(false)}
-                  className={`block rounded-md px-3 py-2 text-[15px] font-medium hover:bg-gray-100 ${
-                    pathname === it.href ? "text-[#0A2E73]" : "text-gray-700"
-                  }`}
+                  className={[
+                    "block rounded-md px-3 py-3 text-base font-medium",
+                    "outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E73]",
+                    pathname === it.href ? "text-[#0A2E73]" : "text-gray-700 hover:bg-gray-100"
+                  ].join(" ")}
                 >
                   {it.label}
                 </Link>
@@ -157,14 +165,14 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="block w-full text-center bg-[#0A2E73] text-white rounded-md py-2 font-semibold"
+                  className="block w-full text-center bg-[#0A2E73] text-white rounded-md py-2.5 text-base font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E73]"
                 >
                   Se connecter
                 </Link>
               ) : (
                 <>
-                  <div className="flex items-center gap-3 px-1 py-2">
-                    <div className="h-9 w-9 rounded-full bg-[#0A2E73] text-white grid place-items-center font-bold">
+                  <div className="flex items-center gap-3 px-1 py-3">
+                    <div className="h-10 w-10 rounded-full bg-[#0A2E73] text-white grid place-items-center font-bold text-base">
                       {ini}
                     </div>
                     <div className="truncate">
@@ -174,7 +182,7 @@ export default function Navbar() {
                   </div>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="mt-2 w-full text-center rounded-md border border-[#0A2E73] text-[#0A2E73] py-2 font-semibold hover:bg-[#0A2E73] hover:text-white transition"
+                    className="mt-2 w-full text-center rounded-md border border-[#0A2E73] text-[#0A2E73] py-2.5 text-base font-semibold hover:bg-[#0A2E73] hover:text-white transition outline-none focus-visible:ring-2 focus-visible:ring-[#0A2E73]"
                   >
                     Se déconnecter
                   </button>
