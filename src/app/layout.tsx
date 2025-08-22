@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import type { Metadata } from "next";
 import Providers from "@/components/Providers";
 import "./globals.css";
@@ -14,17 +13,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr" className="light" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-
-      {/* min-h-screen + flex-col pour coller le footer en bas */}
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-dvh flex flex-col">
         <Providers>
-          {/* Le contenu prend toute la hauteur restante */}
           <main className="flex-1">{children}</main>
+          <Footer />
         </Providers>
-
-        {/* Footer toujours en bas */}
-        <Footer />
       </body>
     </html>
   );
