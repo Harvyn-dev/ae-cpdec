@@ -1,153 +1,129 @@
-"use client";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { useState } from "react";
+"use client"
+
+import type React from "react"
+
+import { signIn } from "next-auth/react"
+import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
+import { useState } from "react"
 
 export default function LoginInner() {
-  const router = useRouter();
-  const q = useSearchParams();
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");            // ← NEW: on garde l'email saisi
-  const [error, setError] = useState<string | null>(null);
-
-  const [resending, setResending] = useState(false); // ← NEW: état bouton renvoi
-  const [resentMsg, setResentMsg] = useState<string | null>(null);
+  const router = useRouter()
+  const q = useSearchParams()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
-    setResentMsg(null);
+    e.preventDefault()
+    setError(null)
 
-    const fd = new FormData(e.currentTarget);
-    const emailForm = String(fd.get("email") || email || "");
-    const password = String(fd.get("password") || "");
+    const fd = new FormData(e.currentTarget)
+    const email = String(fd.get("email") || "")
+    const password = String(fd.get("password") || "")
+    const callbackUrl = q.get("next") || "/"
 
-    setLoading(true);
+    setLoading(true)
     const res = await signIn("credentials", {
       redirect: false,
-      email: emailForm,
+      email,
       password,
-    });
-    setLoading(false);
+      callbackUrl,
+    })
+    setLoading(false)
 
-    if (res?.ok) router.push("/");
-    else if (res?.error === "EMAIL_NOT_VERIFIED") {
-      setError("Votre e-mail n’est pas encore vérifié. Vérifiez votre boîte mail ou renvoyez le lien ci-dessous.");
-    } else {
-      setError(res?.error || "Email ou mot de passe incorrect");
-    }
-  }
-
-  async function resendVerification() {
-    setResentMsg(null);
-    setError(null);
-    // on exige un email non vide
-    const target = email.trim();
-    if (!target) {
-      setError("Renseignez votre e-mail puis cliquez sur « Renvoyer ».");
-      return;
-    }
-
-    try {
-      setResending(true);
-      const res = await fetch("/api/auth/resend-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: target }),
-      });
-      // Réponse générique (ok:true même si l'user n'existe pas, par sécurité)
-      if (!res.ok) throw new Error("Impossible d’envoyer l’e-mail pour le moment.");
-      setResentMsg("Si un compte existe, un nouvel e-mail de vérification vient d’être envoyé.");
-    } catch (e: any) {
-      setError(e.message || "Erreur lors de l’envoi.");
-    } finally {
-      setResending(false);
-    }
+    if (res?.ok) router.push(callbackUrl)
+    else setError(res?.error || "Email ou mot de passe incorrect")
   }
 
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow-sm">
-      <h1 className="text-2xl font-bold mb-1 text-[#0A2E73]">Se connecter</h1>
+    <div className="bg-white rounded-lg p-8 shadow-sm border border-gray-100">
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-semibold mb-2 text-[#0A2E73]">Se connecter</h1>
+        <p className="text-gray-600">Accédez à votre espace AE-CPDEC</p>
+      </div>
 
       {q.get("registered") && (
-        <p className="text-sm text-amber-700 mb-2">
-          Compte créé ✅ — vérifiez votre e-mail pour activer votre compte.
-        </p>
-      )}
-      {q.get("verify") === "ok" && (
-        <p className="text-sm text-green-700 mb-2">E-mail vérifié ✅ Vous pouvez vous connecter.</p>
-      )}
-      {q.get("verify") === "invalid" && (
-        <p className="text-sm text-red-600 mb-2">Lien invalide ou expiré. Vous pouvez renvoyer l’e-mail ci-dessous.</p>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+          <p className="text-sm text-green-700">✓ Compte créé avec succès. Vous pouvez vous connecter.</p>
+        </div>
       )}
 
-      <form className="grid gap-3" onSubmit={onSubmit} autoComplete="on">
-        <label className="text-sm">
-          Email
+      <form className="space-y-6" onSubmit={onSubmit} autoComplete="on">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Email</label>
           <input
             name="email"
             type="email"
             inputMode="email"
             autoComplete="email"
-            className="input"
+            className="input-clean"
+            placeholder="votre@email.com"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}   // ← NEW: on contrôle l'email
           />
-        </label>
-        <label className="text-sm">
-          Mot de passe
-          <input name="password" type="password" autoComplete="current-password" className="input" required />
-        </label>
+        </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {resentMsg && <p className="text-sm text-green-700">{resentMsg}</p>}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Mot de passe</label>
+          <input
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            className="input-clean"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
 
         <button
           disabled={loading}
-          className="bg-[#0A2E73] hover:brightness-110 text-white rounded-md py-2 transition disabled:opacity-60"
+          className="w-full bg-[#0A2E73] hover:bg-[#0A2E73]/90 text-white font-medium rounded-lg py-3 px-4 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? "Connexion..." : "Se connecter"}
         </button>
       </form>
 
-      {/* Lien et bouton de renvoi */}
-      <div className="mt-4 flex items-center justify-between text-sm">
-        <Link href="/register" className="text-[#0A2E73] underline">
-          Créer un compte
-        </Link>
-        <Link href="/forgot" className="text-[#0A2E73] underline">
-          Mot de passe oublié ?
-        </Link>
-      </div>
-
-      <div className="mt-3">
-        <button
-          type="button"
-          onClick={resendVerification}
-          disabled={resending}
-          className="text-sm text-[#0A2E73] underline disabled:opacity-60"
-        >
-          {resending ? "Envoi..." : "Renvoyer l’e-mail de vérification"}
-        </button>
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="flex items-center justify-between text-sm">
+          <Link
+            href="/register"
+            className="text-[#0A2E73] hover:text-[#E9C823] font-medium transition-colors duration-200"
+          >
+            Créer un compte
+          </Link>
+          <Link
+            href="/forgot"
+            className="text-[#0A2E73] hover:text-[#E9C823] font-medium transition-colors duration-200"
+          >
+            Mot de passe oublié ?
+          </Link>
+        </div>
       </div>
 
       <style jsx>{`
-        .input {
+        .input-clean {
           width: 100%;
-          border: 1px solid #e5e7eb;
-          border-radius: 0.6rem;
-          padding: 0.6rem;
-          margin-top: 0.25rem;
+          border: 1px solid #d1d5db;
+          border-radius: 0.5rem;
+          padding: 0.75rem;
           background: #fff;
           color: #111827;
+          transition: border-color 0.2s ease;
+          font-size: 0.95rem;
         }
-        .input:focus {
-          outline: 2px solid #0a2e73;
-          outline-offset: 2px;
+        .input-clean:focus {
+          outline: none;
+          border-color: #0A2E73;
+        }
+        .input-clean::placeholder {
+          color: #9ca3af;
         }
       `}</style>
     </div>
-  );
+  )
 }

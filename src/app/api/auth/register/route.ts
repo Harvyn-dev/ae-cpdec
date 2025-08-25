@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sha256 } from "@/lib/hash";
+import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "@/lib/mailer";
@@ -49,12 +51,15 @@ export async function POST(req: Request) {
     });
 
     // Générer token + hash
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = sha256Hex(rawToken);
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 min
-
+    const token = randomBytes(32).toString("hex");     // à mettre dans le lien email
+    const tokenHash = sha256(token);                   // à stocker en base
+    
     await prisma.emailVerificationToken.create({
-      data: { tokenHash, userId: user.id, expiresAt },
+      data: {
+        tokenHash,                                     // <-- PAS "token"
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 30 * 60_000), // 30 min
+      },
     });
 
     const verifyUrl = `${APP_URL}/api/auth/verify-email?token=${encodeURIComponent(rawToken)}`;
