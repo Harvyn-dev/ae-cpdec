@@ -38,7 +38,8 @@ model User {
   emailVerified DateTime?
 
   // 👇 back-relation vers le token (optionnel, 1-1)
-  emailVerificationToken EmailVerificationToken?
+  verificationTokens EmailVerificationToken[]
+
 
   notifications Notification[]
   newsReads     NewsRead[]
@@ -124,8 +125,25 @@ model President {
 
 model EmailVerificationToken {
   id        String   @id @default(cuid())
-  token     String   @unique
+  tokenHash String   @unique          // on stocke le hash SHA-256 du token
   expiresAt DateTime
-  userId    String   @unique
+  usedAt    DateTime?                 // pour invalider après clic
+  userId    String
   user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
 }
+
+model PreSignupTicket {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String   @unique   // hash du code à 6 chiffres (ou token long)
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "postinstall": "prisma generate",
-    "seed": "tsx prisma/seed.ts"
+    "vercel-build": "prisma migrate deploy && next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
@@ -40,15 +40,5 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
-  },
-
-  
-  "scripts": {
-      "dev": "next dev",
-      "build": "next build",
-      "start": "next start",
-      "postinstall": "prisma generate",
-      "vercel-build": "prisma migrate deploy && next build"
-    }
   }
-  
+}
