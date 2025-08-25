@@ -1,52 +1,41 @@
-// src/lib/email.ts
 import { Resend } from "resend";
 
-const resendApiKey = process.env.RESEND_API_KEY || "";
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
-function baseUrl() {
-  return (
-    process.env.NEXTAUTH_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
-  );
+const apiKey = process.env.RESEND_API_KEY;
+if (!apiKey) {
+  console.warn("RESEND_API_KEY manquant — les emails ne seront pas envoyés.");
 }
 
-/** Envoi générique (diffusions…) */
-export async function sendMail(to: string | string[], subject: string, html: string) {
-  if (!resend) {
-    console.log("[email] (noop) sendMail", { to, subject });
-    return { id: "noop" };
-  }
-  const { data, error } = await resend.emails.send({
-    from: "AE-CPDEC <no-reply@resend.dev>", // remplace par ton domaine vérifié
-    to: Array.isArray(to) ? to : [to],
+export const resend = new Resend(apiKey);
+
+/**
+ * Envoie l’email de vérification.
+ * @param to    adresse email du destinataire
+ * @param link  URL de vérification complète (avec token)
+ */
+export async function sendEmailVerification(to: string, link: string) {
+  if (!apiKey) return;
+
+  const from = process.env.EMAIL_FROM || "no-reply@example.com";
+  const subject = "Vérifie ton adresse email – AE-CPDEC";
+  const html = `
+    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto">
+      <h2>Bienvenue à l’AE-CPDEC 👋</h2>
+      <p>Merci de t’être inscrit. Clique sur le bouton ci-dessous pour vérifier ton adresse email&nbsp;:</p>
+      <p>
+        <a href="${link}"
+           style="display:inline-block;background:#0A2E73;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">
+          Vérifier mon email
+        </a>
+      </p>
+      <p>Ou copie ce lien dans ton navigateur&nbsp;:<br/><code>${link}</code></p>
+      <p style="color:#6b7280">Ce lien expire dans 30 minutes.</p>
+    </div>
+  `;
+
+  await resend.emails.send({
+    from,
+    to,
     subject,
     html,
   });
-  if (error) throw error;
-  return data;
-}
-
-/** Email de vérification (inscription) */
-export async function sendVerificationEmail(to: string, token: string) {
-  const verifyUrl = `${baseUrl()}/verify?token=${encodeURIComponent(token)}`;
-
-  if (!resend) {
-    console.log("[email] (noop) sendVerificationEmail", { to, verifyUrl });
-    return { id: "noop" };
-  }
-
-  const { data, error } = await resend.emails.send({
-    from: "AE-CPDEC <no-reply@resend.dev>",
-    to,
-    subject: "Vérifiez votre adresse email",
-    html: `
-      <p>Bienvenue à l’AE-CPDEC !</p>
-      <p>Pour confirmer votre adresse, cliquez ce lien :</p>
-      <p><a href="${verifyUrl}">${verifyUrl}</a></p>
-      <p>Si vous n’êtes pas à l’origine de cette demande, ignorez cet email.</p>
-    `,
-  });
-  if (error) throw error;
-  return data;
 }

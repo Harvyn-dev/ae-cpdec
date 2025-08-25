@@ -1,73 +1,68 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sha256 } from "@/lib/hash";
-import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import { sendVerificationEmail } from "@/lib/mailer";
+import { sha256Hex } from "@/lib/hash";
+import { sendEmailVerification } from "@/lib/email";
 
-const APP_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
-
-// util SHA-256 hex
-function sha256Hex(s: string) {
-  return crypto.createHash("sha256").update(s).digest("hex");
+function addMinutes(date: Date, mins: number) {
+  return new Date(date.getTime() + mins * 60_000);
 }
 
 export async function POST(req: Request) {
   try {
-    const { firstName, lastName, email, password, phone, className } = await req.json();
+    const body = await req.json();
+    const { firstName, lastName, email, phone, className, password } = body || {};
 
-    if (!firstName || !lastName || !email || !password) {
-      return NextResponse.json({ ok: false, error: "INVALID" }, { status: 400 });
+    if (!firstName || !lastName || !email || !phone || !className || !password) {
+      return NextResponse.json({ error: "Champs manquants" }, { status: 400 });
     }
 
-    const normalizedEmail = String(email).toLowerCase().trim();
-
-    // Réponse générique pour ne pas divulguer l’existence d’un compte
-    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      // Optionnel : si non vérifié, on peut relancer un e-mail ici
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({ error: "Email déjà utilisé" }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(String(password), 12);
 
     const user = await prisma.user.create({
       data: {
-        email: normalizedEmail,
-        firstName: String(firstName).trim(),
-        lastName: String(lastName).trim(),
+        firstName,
+        lastName,
+        email,
+        phone,
+        className,
         passwordHash,
-        phone: String(phone || "").trim(),
-        className: String(className || "").trim(),
-        // emailVerified: null (par défaut)
+        // emailVerified: null par défaut ➜ l’utilisateur NE peut pas se connecter
       },
     });
 
-    // Invalider les anciens tokens non utilisés (au cas où)
-    await prisma.emailVerificationToken.updateMany({
-      where: { userId: user.id, usedAt: null },
-      data: { usedAt: new Date() },
-    });
+    // Génère un token aléatoire (visible côté utilisateur)
+    const rawToken = crypto.randomUUID() + crypto.randomUUID();
+    const tokenHash = await sha256Hex(rawToken);
 
-    // Générer token + hash
-    const token = randomBytes(32).toString("hex");     // à mettre dans le lien email
-    const tokenHash = sha256(token);                   // à stocker en base
-    
+    // Stocke le hash + expiration (30 min)
     await prisma.emailVerificationToken.create({
       data: {
-        tokenHash,                                     // <-- PAS "token"
+        tokenHash,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 30 * 60_000), // 30 min
+        expiresAt: addMinutes(new Date(), 30),
       },
     });
 
-    const verifyUrl = `${APP_URL}/api/auth/verify-email?token=${encodeURIComponent(rawToken)}`;
-    await sendVerificationEmail(user.email, verifyUrl);
+    // Construit le lien public de vérification
+    const base =
+      process.env.NEXTAUTH_URL?.replace(/\/$/, "") || "http://localhost:3000";
+    const verifyUrl = `${base}/api/auth/verify?token=${encodeURIComponent(rawToken)}`;
+
+    // Envoi de l’email
+    await sendEmailVerification(email, verifyUrl);
 
     return NextResponse.json({ ok: true });
-  } catch (e) {
-    console.error("REGISTER ERROR", e);
-    return NextResponse.json({ ok: false }, { status: 400 });
+  } catch (e: any) {
+    console.error(e);
+    return NextResponse.json(
+      { error: "Erreur d’inscription" },
+      { status: 500 }
+    );
   }
 }

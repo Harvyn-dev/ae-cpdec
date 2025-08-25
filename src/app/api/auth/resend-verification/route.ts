@@ -1,38 +1,55 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
-import { sendVerificationEmail } from "@/lib/mailer";
+import { sha256Hex } from "@/lib/hash";
+import { sendEmailVerification } from "@/lib/email";
 
-const APP_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
-
-function sha256Hex(s: string) {
-  return crypto.createHash("sha256").update(s).digest("hex");
+function addMinutes(date: Date, mins: number) {
+  return new Date(date.getTime() + mins * 60_000);
 }
 
 export async function POST(req: Request) {
-  const { email } = await req.json();
-  const normalized = String(email || "").toLowerCase().trim();
-  if (!normalized) return NextResponse.json({ ok: false, error: "EMAIL_REQUIRED" }, { status: 400 });
+  try {
+    const { email } = await req.json();
+    if (!email) {
+      return NextResponse.json({ error: "Email manquant" }, { status: 400 });
+    }
 
-  const user = await prisma.user.findUnique({ where: { email: normalized } });
-  // Réponse générique
-  if (!user || user.emailVerified) return NextResponse.json({ ok: true });
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // Réponse générique pour ne pas révéler la présence d’un compte
+      return NextResponse.json({ ok: true });
+    }
+    if (user.emailVerified) {
+      return NextResponse.json({ ok: true });
+    }
 
-  await prisma.emailVerificationToken.updateMany({
-    where: { userId: user.id, usedAt: null },
-    data: { usedAt: new Date() },
-  });
+    // Invalide les anciens tokens non utilisés
+    await prisma.emailVerificationToken.deleteMany({
+      where: { userId: user.id, usedAt: null },
+    });
 
-  const rawToken = crypto.randomBytes(32).toString("hex");
-  const tokenHash = sha256Hex(rawToken);
-  const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    const rawToken = crypto.randomUUID() + crypto.randomUUID();
+    const tokenHash = await sha256Hex(rawToken);
 
-  await prisma.emailVerificationToken.create({
-    data: { tokenHash, userId: user.id, expiresAt },
-  });
+    await prisma.emailVerificationToken.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        expiresAt: addMinutes(new Date(), 30),
+      },
+    });
 
-  const verifyUrl = `${APP_URL}/api/auth/verify-email?token=${encodeURIComponent(rawToken)}`;
-  await sendVerificationEmail(user.email, verifyUrl);
+    const base =
+      process.env.NEXTAUTH_URL?.replace(/\/$/, "") || "http://localhost:3000";
+    const verifyUrl = `${base}/api/auth/verify?token=${encodeURIComponent(
+      rawToken
+    )}`;
 
-  return NextResponse.json({ ok: true });
+    await sendEmailVerification(email, verifyUrl);
+
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "Erreur" }, { status: 500 });
+  }
 }

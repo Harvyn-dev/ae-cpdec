@@ -1,36 +1,41 @@
-// extrait de src/app/api/auth/[...nextauth]/route.ts
-import bcrypt from "bcryptjs";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 const handler = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
   providers: [
     Credentials({
-      name: "Credentials",
-      credentials: { email: {}, password: {} },
-      async authorize(creds) {
-        const email = String(creds?.email || "").toLowerCase().trim();
-        const password = String(creds?.password || "");
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Mot de passe", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = String(credentials?.email || "").trim().toLowerCase();
+        const password = String(credentials?.password || "");
 
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user?.passwordHash) return null;
+        if (!user) return null;
 
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return null;
 
         if (!user.emailVerified) {
-          throw new Error("EMAIL_NOT_VERIFIED");
+          // message lisible côté client (signIn(...).error)
+            throw new Error("EMAIL_NOT_VERIFIED");
         }
 
-        return { id: user.id, email: user.email, name: `${user.firstName} ${user.lastName}` };
+        return {
+          id: user.id,
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`.trim(),
+          role: user.role,
+        };
       },
     }),
   ],
-  pages: { signIn: "/login" },
+  // ... tes callbacks, session, etc.
 });
 
 export { handler as GET, handler as POST };
